@@ -66,6 +66,7 @@ public class MainActivity extends ActionBarActivity {
         swipe = (SwipeRefreshLayout)findViewById(R.id.swipe);
         recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
         final LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(mLayoutManager);
 
         if(myPreferencesImpl.getAccessToken().equals("")){
             login();
@@ -84,7 +85,6 @@ public class MainActivity extends ActionBarActivity {
                 mediaInfoList = mediaInfoJson.createListFromJson(jsonObject);
                 adapter = new MediaInfoAdapter(mediaInfoList, MainActivity.this, accessToken);
                 recyclerView.setAdapter(adapter);
-                recyclerView.setLayoutManager(mLayoutManager);
                 countDownloads++;
                 try {
                     maxId = jsonObject.getJSONObject("pagination").getString("next_max_id");
