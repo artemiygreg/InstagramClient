@@ -11,14 +11,16 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONObject;
 import ru.instagramclient.Json.JsonCallback;
 import ru.instagramclient.Model.User;
-import ru.instagramclient.MyPrefs;
 import ru.instagramclient.Server.AuthWebViewClient;
 import ru.instagramclient.Server.GetToken;
 import ru.instagramclient.Server.Server;
+import ru.instagramclient.Service.Preferences.MyPreferences;
+import ru.instagramclient.Service.Preferences.MyPreferencesImpl;
 import ru.instagramclient.View.Activity.LoginActivity;
 import ru.instagramclient.View.Activity.MainActivity;
 import ru.instagramclient.View.AlertDialog.MyAlertDialog;
 import ru.instagramclient.View.AlertDialog.MyAlertDialogImpl;
+import ru.instagramclient.View.Logout;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +32,7 @@ public class WebAPIImpl implements WebAPI {
     private static WebAPI instance = null;
     private MyAlertDialog myAlert;
     private Context context;
-    private MyPrefs myPrefs;
+    private MyPreferences myPreferencesImpl;
     private RequestQueue requestQueue;
     private static final int POST = Request.Method.POST;
     private static final int GET = Request.Method.GET;
@@ -41,12 +43,12 @@ public class WebAPIImpl implements WebAPI {
     private static final String MEDIA = "/media/";
     private static final String LIKES = "/likes";
     private static final String COMMENTS = "/comments";
-    private static final String LOGOUT = Server.PROTOCOL + Server.HOST + "/account/logout/";
+    public static final String LOGOUT = Server.PROTOCOL_HTTPS + Server.HOST + "/accounts/logout/";
 
     public WebAPIImpl(Context context){
         this.context = context;
         requestQueue = Volley.newRequestQueue(context);
-        myPrefs = new MyPrefs(context);
+        myPreferencesImpl = new MyPreferencesImpl(context);
         myAlert = new MyAlertDialogImpl(context);
         instance = this;
     }
@@ -56,7 +58,7 @@ public class WebAPIImpl implements WebAPI {
 
     @Override
     public WebView authFirstStep() {
-        String url = Server.PROTOCOL + Server.API_HOST + AUTH;
+        String url = Server.PROTOCOL_HTTPS + Server.API_HOST + AUTH;
 
         WebView webView = new WebView(context);
         webView.setWebViewClient(new AuthWebViewClient(new GetToken() {
@@ -76,7 +78,7 @@ public class WebAPIImpl implements WebAPI {
         if(showProgressDialog) {
             myAlert.showProgressDialog();
         }
-        String url = Server.PROTOCOL + Server.API_VERSION + GET_MY_SELF_MEDIA + Vars.ACCESS_TOKEN + "=" + accessToken + "&" +Vars.COUNT+"=" + count + "&"+Vars.MAX_ID+"=" + maxId;
+        String url = Server.PROTOCOL_HTTPS + Server.API_VERSION + GET_MY_SELF_MEDIA + Vars.ACCESS_TOKEN + "=" + accessToken + "&" +Vars.COUNT+"=" + count + "&"+Vars.MAX_ID+"=" + maxId;
         JsonObjectRequest request = new JsonObjectRequest(GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
@@ -94,7 +96,7 @@ public class WebAPIImpl implements WebAPI {
     }
 
     private void getAuthToken(final String code) {
-        String url = Server.PROTOCOL + Server.API_HOST + GET_ACCESS_TOKEN;
+        String url = Server.PROTOCOL_HTTPS + Server.API_HOST + GET_ACCESS_TOKEN;
         StringRequest request = new StringRequest(POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String result) {
@@ -108,7 +110,7 @@ public class WebAPIImpl implements WebAPI {
                     user.setFullName(json.getJSONObject(Vars.USER).getString(Vars.FULL_NAME));
                     user.setImageProfile(json.getJSONObject(Vars.USER).getString(Vars.PROFILE_PICTURE));
 
-                    myPrefs.savePrefFromUser(user);
+                    myPreferencesImpl.savePrefFromUser(user);
 
                     Intent main = new Intent(context, MainActivity.class);
                     context.startActivity(main);
@@ -138,41 +140,36 @@ public class WebAPIImpl implements WebAPI {
         requestQueue.add(request);
     }
     @Override
-    public void logout(final String accessToken, final JsonCallback jsonCallback) {
+    public void logout(final String accessToken, final Logout logout) {
         myAlert.showProgressDialog();
-        StringRequest request = new  StringRequest(POST, LOGOUT, new Response.Listener<String>() {
+        StringRequest request = new  StringRequest(GET, LOGOUT + "?" + Vars.ACCESS_TOKEN + "=" + accessToken, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
                 Log.e("response", s);
                 myAlert.dismissProgressDialog();
-                /*try {
-                    jsonCallback.run(new JSONObject(s));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }*/
+                logout.success();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
                 Log.e("error", volleyError.getMessage());
+                logout.failed(volleyError.getMessage());
                 myAlert.dismissProgressDialog();
             }
-        }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> map = new HashMap<String, String>();
-                map.put(Vars.ACCESS_TOKEN, accessToken);
-
-                return map;
-            }
-        };
+        });
         requestQueue.add(request);
+        WebView webView = new WebView(context);
+        AuthWebViewClient client = new AuthWebViewClient(null);
+//        client.setLogout(logout);
+        webView.setWebViewClient(client);
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.loadUrl(LOGOUT);
     }
 
     @Override
     public void setLike(String mediaId, final String accessToken) {
         myAlert.showProgressDialog();
-        String url = Server.PROTOCOL + Server.API_VERSION + MEDIA + mediaId + LIKES;
+        String url = Server.PROTOCOL_HTTPS + Server.API_VERSION + MEDIA + mediaId + LIKES;
         StringRequest request = new StringRequest(POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
@@ -188,7 +185,7 @@ public class WebAPIImpl implements WebAPI {
         }){
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> map = new HashMap<String, String>();
+                Map<String,String> map = new HashMap<>();
                 map.put(Vars.ACCESS_TOKEN, accessToken);
 
                 return map;
@@ -200,7 +197,7 @@ public class WebAPIImpl implements WebAPI {
     @Override
     public void getLikes(String mediaId, String accessToken, final JsonCallback jsonCallback) {
         myAlert.showProgressDialog();
-        String url = Server.PROTOCOL + Server.API_VERSION + MEDIA + mediaId + LIKES + "?" + Vars.ACCESS_TOKEN + "=" + accessToken;
+        String url = Server.PROTOCOL_HTTPS + Server.API_VERSION + MEDIA + mediaId + LIKES + "?" + Vars.ACCESS_TOKEN + "=" + accessToken;
         Log.e("url", url);
         JsonObjectRequest request = new JsonObjectRequest(GET, url, null, new Response.Listener<JSONObject>() {
             @Override
@@ -222,7 +219,7 @@ public class WebAPIImpl implements WebAPI {
     @Override
     public void removeLike(String mediaId, String accessToken) {
         myAlert.showProgressDialog();
-        String url = Server.PROTOCOL + Server.API_VERSION + MEDIA + mediaId + LIKES +"?"+Vars.ACCESS_TOKEN+"="+accessToken;
+        String url = Server.PROTOCOL_HTTPS + Server.API_VERSION + MEDIA + mediaId + LIKES +"?"+Vars.ACCESS_TOKEN+"="+accessToken;
         JsonObjectRequest request = new JsonObjectRequest(DELETE, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
@@ -241,7 +238,7 @@ public class WebAPIImpl implements WebAPI {
     @Override
     public void getComments(String mediaId, String accessToken, final JsonCallback jsonCallback) {
         myAlert.showProgressDialog();
-        String url = Server.PROTOCOL + Server.API_VERSION + MEDIA + mediaId + COMMENTS + "?" + Vars.ACCESS_TOKEN + "=" + accessToken;
+        String url = Server.PROTOCOL_HTTPS + Server.API_VERSION + MEDIA + mediaId + COMMENTS + "?" + Vars.ACCESS_TOKEN + "=" + accessToken;
         Log.e("url", url);
         JsonObjectRequest request = new JsonObjectRequest(GET, url, null, new Response.Listener<JSONObject>() {
             @Override
@@ -263,7 +260,7 @@ public class WebAPIImpl implements WebAPI {
     @Override
     public void sendComment(String mediaId, final String text, final String accessToken) {
         myAlert.showProgressDialog();
-        String url = Server.PROTOCOL + Server.API_VERSION + MEDIA + mediaId + COMMENTS;
+        String url = Server.PROTOCOL_HTTPS + Server.API_VERSION + MEDIA + mediaId + COMMENTS;
         StringRequest request = new StringRequest(POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
@@ -272,16 +269,16 @@ public class WebAPIImpl implements WebAPI {
             }
         }, new Response.ErrorListener() {
             @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                Log.e("error", volleyError.getMessage());
+            public void onErrorResponse(VolleyError volleyError){
+                Log.e("error", volleyError.toString());
                 myAlert.dismissProgressDialog();
             }
         }){
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> map = new HashMap<String, String>();
-                map.put(Vars.TEXT, text);
+                Map<String,String> map = new HashMap<>();
                 map.put(Vars.ACCESS_TOKEN, accessToken);
+                map.put(Vars.TEXT, text);
 
                 return map;
             }

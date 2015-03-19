@@ -4,8 +4,8 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import ru.instagramclient.Model.Comments;
-import ru.instagramclient.Model.Likes;
+import ru.instagramclient.Model.Comment;
+import ru.instagramclient.Model.Like;
 import ru.instagramclient.Model.MediaInfo;
 import ru.instagramclient.Service.String.StringService;
 
@@ -23,7 +23,6 @@ public class MediaInfoJson {
 
     public List<MediaInfo> createListFromJson(JSONObject jsonObject){
         List<MediaInfo> mediaInfoList = new ArrayList<MediaInfo>();
-        List<Likes> listLikes = new ArrayList<Likes>();
         try {
             for(int i = 0; i < jsonObject.getJSONArray("data").length(); i++){
 
@@ -44,6 +43,8 @@ public class MediaInfoJson {
 
                 JSONArray jsonArrayLikes = jsonObject.getJSONArray("data").getJSONObject(i).getJSONObject("likes").getJSONArray("data");
                 JSONArray jsonArrayComments = jsonObject.getJSONArray("data").getJSONObject(i).getJSONObject("comments").getJSONArray("data");
+                List<Like> listLikes = createListLikeFromJson(jsonArrayLikes);
+                List<Comment> listComments = createListCommentsFromJson(jsonArrayComments);
 
                 MediaInfo mediaInfo = new MediaInfo();
                 mediaInfo.setId(id);
@@ -59,8 +60,8 @@ public class MediaInfoJson {
                 mediaInfo.setStandartImage(standartImage);
                 mediaInfo.setCountLike(countLike);
                 mediaInfo.setCountComments(countComment);
-                mediaInfo.setListLikes(createListLikeFromJson(jsonArrayLikes));
-                mediaInfo.setListComment(createListCommentsFromJson(jsonArrayComments));
+                mediaInfo.setListLikes(listLikes);
+                mediaInfo.setListComment(listComments);
 
                 mediaInfoList.add(mediaInfo);
             }
@@ -70,37 +71,37 @@ public class MediaInfoJson {
 
         return mediaInfoList;
     }
-    public List<Likes> createListLikeFromJson(JSONArray jsonArray){
-        List<Likes> list = new ArrayList<Likes>();
+    public List<Like> createListLikeFromJson(JSONArray jsonArray){
+        List<Like> list = new ArrayList<Like>();
         try {
             for(int j = 0; j < jsonArray.length(); j++){
-                Likes likes = new Likes();
-                likes.setFullName(jsonArray.getJSONObject(j).getString("full_name"));
-                likes.setId(jsonArray.getJSONObject(j).getLong("id"));
-                likes.setUsername(jsonArray.getJSONObject(j).getString("username"));
-                likes.setProfilePicture(jsonArray.getJSONObject(j).getString("profile_picture"));
+                Like like = new Like();
+                like.setFullName(jsonArray.getJSONObject(j).getString("full_name"));
+                like.setId(jsonArray.getJSONObject(j).getLong("id"));
+                like.setUsername(jsonArray.getJSONObject(j).getString("username"));
+                like.setProfilePicture(jsonArray.getJSONObject(j).getString("profile_picture"));
 
-                list.add(likes);
+                list.add(like);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return list;
     }
-    public List<Comments> createListCommentsFromJson(JSONArray jsonArray){
-        List<Comments> list = new ArrayList<Comments>();
+    public List<Comment> createListCommentsFromJson(JSONArray jsonArray){
+        List<Comment> list = new ArrayList<Comment>();
         try {
             for(int j = 0; j < jsonArray.length(); j++){
-                Comments comments = new Comments();
-                comments.setProfilePicture(jsonArray.getJSONObject(j).getJSONObject("from").getString("profile_picture"));
-                comments.setUsername(jsonArray.getJSONObject(j).getJSONObject("from").getString("username"));
-                comments.setFullName(jsonArray.getJSONObject(j).getJSONObject("from").getString("full_name"));
-                comments.setIdSender(jsonArray.getJSONObject(j).getJSONObject("from").getLong("id"));
-                comments.setIdComment(jsonArray.getJSONObject(j).getLong("id"));
-                comments.setCreatedTime(jsonArray.getJSONObject(j).getLong("created_time"));
-                comments.setText(jsonArray.getJSONObject(j).getString("text"));
+                Comment comment = new Comment();
+                comment.setProfilePicture(jsonArray.getJSONObject(j).getJSONObject("from").getString("profile_picture"));
+                comment.setUsername(jsonArray.getJSONObject(j).getJSONObject("from").getString("username"));
+                comment.setFullName(jsonArray.getJSONObject(j).getJSONObject("from").getString("full_name"));
+                comment.setIdSender(jsonArray.getJSONObject(j).getJSONObject("from").getLong("id"));
+                comment.setIdComment(jsonArray.getJSONObject(j).getLong("id"));
+                comment.setCreatedTime(jsonArray.getJSONObject(j).getLong("created_time"));
+                comment.setText(jsonArray.getJSONObject(j).getString("text"));
 
-                list.add(comments);
+                list.add(comment);
             }
         } catch (JSONException e) {
             e.printStackTrace();

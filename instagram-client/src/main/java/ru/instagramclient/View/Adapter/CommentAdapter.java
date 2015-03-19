@@ -17,11 +17,12 @@ import ru.instagramclient.API.WebAPI;
 import ru.instagramclient.API.WebAPIImpl;
 import ru.instagramclient.Json.JsonCallback;
 import ru.instagramclient.Json.MediaInfoJson;
-import ru.instagramclient.Model.Comments;
-import ru.instagramclient.Model.Likes;
+import ru.instagramclient.Model.Comment;
+import ru.instagramclient.Model.Like;
 import ru.instagramclient.Model.MediaInfo;
 import ru.instagramclient.R;
 import ru.instagramclient.Service.Date.DateService;
+import ru.instagramclient.Service.Image.ImageProccessor;
 import ru.instagramclient.Service.Image.ImageService;
 import ru.instagramclient.View.AlertDialog.MyAlertDialog;
 import ru.instagramclient.View.AlertDialog.MyAlertDialogImpl;
@@ -37,7 +38,7 @@ import java.util.Map;
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder> {
     private MyAlertDialog myAlertDialog;
     private WebAPI webAPI;
-    private List<Comments> listComments;
+    private List<Comment> listComments;
     private MediaInfo mediaInfo;
     private String accessToken;
     private Activity activity;
@@ -59,15 +60,15 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
         }
     };
 
-    public CommentAdapter(List<Comments> listComments, String accessToken, MediaInfo mediaInfo, Activity activity){
+    public CommentAdapter(List<Comment> listComments, String accessToken, MediaInfo mediaInfo, Activity activity){
         Log.e("CommentAdapter constructor", "run");
         this.listComments = listComments;
         if(listComments.size() == 0){
-            Comments comments = new Comments();
-            comments.setUsername("");
-            comments.setText("");
-            comments.setCreatedTime(0);
-            listComments.add(comments);
+            Comment comment = new Comment();
+            comment.setUsername("");
+            comment.setText("");
+            comment.setCreatedTime(0);
+            listComments.add(comment);
         }
         this.accessToken = accessToken;
         this.mediaInfo = mediaInfo;
@@ -120,7 +121,7 @@ public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickL
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
         Log.e("onBindViewHolder", "run");
-        final Comments comments = listComments.get(position);
+        final Comment comment = listComments.get(position);
 
         if(position == 0) {
             holder.imagePost.setVisibility(View.VISIBLE);
@@ -165,10 +166,8 @@ public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickL
                         public void run(JSONObject jsonObject) {
                             try {
                                 MediaInfoJson mediaInfoJson = new MediaInfoJson();
-                                List<Likes> listLikes = mediaInfoJson.createListLikeFromJson(jsonObject.getJSONArray("data"));
-                                Log.e("list", "size - " + listLikes.size());
-                                LikeAdapter adapter = new LikeAdapter(listLikes,  activity, R.layout.list_item_like);
-                                myAlertDialog.showAlertAllLikes(listLikes, adapter);
+                                List<Like> listLikes = mediaInfoJson.createListLikeFromJson(jsonObject.getJSONArray("data"));
+                                myAlertDialog.showAlertAllLikes(listLikes);
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -178,18 +177,18 @@ public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickL
                 }
             });
             if (mapProfile.containsKey(position)) {
-                holder.imageProfileOwner.setImageBitmap(mapProfile.get(position));
+                holder.imageProfileOwner.setImageBitmap(ImageProccessor.getRoundedCornersImage(mapProfile.get(position), 50));
             } else {
-                imageService.setImageByLink(holder.imageProfileOwner, comments.getProfilePicture(), adapterProfile, position);
+                imageService.setImageByLinkWithRounded(holder.imageProfileOwner, comment.getProfilePicture(), adapterProfile, position);
             }
-            if(comments.getUsername().equals("") && comments.getText().equals("") && comments.getCreatedTime() == 0){
+            if(comment.getUsername().equals("") && comment.getText().equals("") && comment.getCreatedTime() == 0){
                 holder.cardView.setVisibility(View.GONE);
             }
             else {
                 holder.cardView.setVisibility(View.VISIBLE);
-                holder.nameOwner.setText(comments.getUsername());
-                holder.message.setText(comments.getText());
-                holder.dateCreated.setText(DateService.convertTimestampToString(comments.getCreatedTime() * 1000, DateService.DATE_AND_TIME_FORMAT_RU));
+                holder.nameOwner.setText(comment.getUsername());
+                holder.message.setText(comment.getText());
+                holder.dateCreated.setText(DateService.convertTimestampToString(comment.getCreatedTime() * 1000, DateService.DATE_AND_TIME_FORMAT_RU));
             }
         }
         else {
@@ -198,13 +197,13 @@ public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickL
             holder.showAllLike.setVisibility(View.GONE);
             holder.countLike.setVisibility(View.GONE);
             if (mapProfile.containsKey(position)) {
-                holder.imageProfileOwner.setImageBitmap(mapProfile.get(position));
+                holder.imageProfileOwner.setImageBitmap(ImageProccessor.getRoundedCornersImage(mapProfile.get(position), 50));
             } else {
-                imageService.setImageByLinkWithRounded(holder.imageProfileOwner, comments.getProfilePicture(), adapterProfile, position);
+                imageService.setImageByLinkWithRounded(holder.imageProfileOwner, comment.getProfilePicture(), adapterProfile, position);
             }
-            holder.nameOwner.setText(comments.getUsername());
-            holder.message.setText(comments.getText());
-            holder.dateCreated.setText(DateService.convertTimestampToString(comments.getCreatedTime() * 1000, DateService.DATE_AND_TIME_FORMAT_RU));
+            holder.nameOwner.setText(comment.getUsername());
+            holder.message.setText(comment.getText());
+            holder.dateCreated.setText(DateService.convertTimestampToString(comment.getCreatedTime() * 1000, DateService.DATE_AND_TIME_FORMAT_RU));
         }
     }
 
@@ -212,7 +211,7 @@ public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickL
     public int getItemCount() {
         return listComments.size();
     }
-    public void addItems(Comments list){
+    public void addItems(Comment list){
         listComments.add(list);
     }
     public static interface OnItemClickListener{

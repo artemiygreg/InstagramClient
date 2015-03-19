@@ -10,6 +10,8 @@ public class Vars {
     public static final String GRANT_TYPE = "grant_type";
     public static final String AUTHORIZATION_CODE = "authorization_code";
     public static final String CODE = "code";
+    public static final String STATUS = "status";
+    public static final String OK = "ok";
     public static final String USER = "user";
     public static final String USERNAME = "username";
     public static final String PROFILE_PICTURE = "profile_picture";

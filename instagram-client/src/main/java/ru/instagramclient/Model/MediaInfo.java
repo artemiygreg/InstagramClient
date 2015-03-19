@@ -15,8 +15,8 @@ public class MediaInfo implements Parcelable {
     private String link;
     private Boolean userHasLike = false;
     private TypePost typePost;
-    private List<Likes> listLikes;
-    private List<Comments> listComment;
+    private List<Like> listLikes;
+    private List<Comment> listComment;
     private long ownerId;
     private String ownerName;
     private String ownerFullName;
@@ -31,7 +31,7 @@ public class MediaInfo implements Parcelable {
 
     }
 
-    public MediaInfo(String id, String link, Boolean userHasLike, TypePost typePost, List<Likes> listLikes, List<Comments> listComment, long ownerId, String ownerName, String ownerFullName, String ownerProfilePicture, String smallImage, String lowImage, String standartImage, int countLike, int countComments) {
+    public MediaInfo(String id, String link, Boolean userHasLike, TypePost typePost, List<Like> listLikes, List<Comment> listComment, long ownerId, String ownerName, String ownerFullName, String ownerProfilePicture, String smallImage, String lowImage, String standartImage, int countLike, int countComments) {
         this.id = id;
         this.link = link;
         this.userHasLike = userHasLike;
@@ -81,11 +81,11 @@ public class MediaInfo implements Parcelable {
         this.typePost = typePost;
     }
 
-    public List<Likes> getListLikes() {
+    public List<Like> getListLikes() {
         return listLikes;
     }
 
-    public void setListLikes(List<Likes> listLikes) {
+    public void setListLikes(List<Like> listLikes) {
         this.listLikes = listLikes;
     }
 
@@ -153,11 +153,11 @@ public class MediaInfo implements Parcelable {
         this.standartImage = standartImage;
     }
 
-    public List<Comments> getListComment() {
+    public List<Comment> getListComment() {
         return listComment;
     }
 
-    public void setListComment(List<Comments> listComment) {
+    public void setListComment(List<Comment> listComment) {
         this.listComment = listComment;
     }
 

@@ -6,6 +6,10 @@
             <solid android:color="#cdcdcd"/>
             <stroke android:width="2dp"
                     android:color="@color/bg"/>
+            <padding android:bottom="2dp"
+                     android:top="2dp"
+                     android:right="2dp"
+                     android:left="2dp"/>
         </shape>
     </item>
 </selector>

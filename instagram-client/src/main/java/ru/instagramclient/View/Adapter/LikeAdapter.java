@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import ru.instagramclient.Model.Likes;
+import ru.instagramclient.Model.Like;
 import ru.instagramclient.R;
 import ru.instagramclient.Service.Image.ImageService;
 import ru.instagramclient.View.BitmapAdapter;
@@ -20,8 +20,8 @@ import java.util.Map;
 /**
  * Created by Admin on 17.03.15.
  */
-public class LikeAdapter extends ArrayAdapter<Likes> {
-    private List<Likes> listLike;
+public class LikeAdapter extends ArrayAdapter<Like> {
+    private List<Like> listLike;
     private ViewHolder holder;
     private Activity activity;
     private ImageService imageService;
@@ -33,7 +33,7 @@ public class LikeAdapter extends ArrayAdapter<Likes> {
         }
     };
 
-    public LikeAdapter(List<Likes> listLike, Activity activity, int resId) {
+    public LikeAdapter(List<Like> listLike, Activity activity, int resId) {
         super(activity, resId, listLike);
         this.listLike = listLike;
         this.activity = activity;
@@ -46,26 +46,25 @@ public class LikeAdapter extends ArrayAdapter<Likes> {
         public ImageView imageProfile;
     }
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         View view = convertView;
         if(view == null) {
             holder = new ViewHolder();
             LayoutInflater layoutInflater = LayoutInflater.from(getContext());
             view = layoutInflater.inflate(R.layout.list_item_like, null);
-            holder.username = (TextView) view.findViewById(R.id.username);
             holder.imageProfile = (ImageView) view.findViewById(R.id.imageProfile);
             view.setTag(holder);
         }
         else {
             holder = (ViewHolder)view.getTag();
         }
-        Likes likes = listLike.get(position);
+        final Like like = listLike.get(position);
 //        holder.username.setText(likes.getUsername());
         if(mapProfile.containsKey(position)) {
             holder.imageProfile.setImageBitmap(mapProfile.get(position));
         }
         else {
-            imageService.setImageByLink(holder.imageProfile, likes.getProfilePicture(), adapterProfile, position);
+            imageService.setImageByLink(holder.imageProfile, like.getProfilePicture(), adapterProfile, position);
         }
 
         return view;

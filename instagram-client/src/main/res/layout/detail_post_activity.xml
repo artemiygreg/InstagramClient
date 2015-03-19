@@ -20,12 +20,13 @@
             android:id="@+id/editText" android:layout_alignParentBottom="true"
             android:layout_toLeftOf="@+id/imageButton" android:layout_toStartOf="@+id/imageButton"
             android:background="@drawable/bg_edit_text" android:padding="5dp" android:minHeight="50dp"
-            android:layout_marginRight="10dp" android:inputType="text" android:gravity="center_vertical"/>
+            android:inputType="text" android:gravity="center_vertical"/>
     <ImageButton
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:id="@+id/imageButton"
             android:src="@drawable/imagebutton_comment_send" android:background="@drawable/bg_btn_send"
             android:onClick="onClickSendComment" android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true" android:layout_alignParentEnd="true"/>
+            android:layout_alignParentRight="true" android:layout_alignParentEnd="true"
+            android:layout_marginLeft="-2dp"/>
 </RelativeLayout>

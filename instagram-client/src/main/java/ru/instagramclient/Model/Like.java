@@ -3,18 +3,18 @@ package ru.instagramclient.Model;
 /**
  * Created by Admin on 12.03.15.
  */
-public class Likes {
+public class Like {
     private long id;
     private String profilePicture;
     private String username;
     private String fullName;
     private int countLikes;
 
-    public Likes(){
+    public Like(){
 
     }
 
-    public Likes(long id, String profilePicture, String username, String fullName, int countLikes) {
+    public Like(long id, String profilePicture, String username, String fullName, int countLikes) {
         this.id = id;
         this.profilePicture = profilePicture;
         this.username = username;

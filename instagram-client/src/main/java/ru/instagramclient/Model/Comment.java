@@ -3,7 +3,7 @@ package ru.instagramclient.Model;
 /**
  * Created by Admin on 12.03.15.
  */
-public class Comments {
+public class Comment {
     private long idComment;
     private String text;
     private long createdTime = 0;
@@ -12,11 +12,11 @@ public class Comments {
     private String username;
     private String fullName;
 
-    public Comments(){
+    public Comment(){
 
     }
 
-    public Comments(long idComment, String text, long createdTime, long idSender, String profilePicture, String username, String fullName) {
+    public Comment(long idComment, String text, long createdTime, long idSender, String profilePicture, String username, String fullName) {
         this.idComment = idComment;
         this.text = text;
         this.createdTime = createdTime;

@@ -1,12 +1,13 @@
 package ru.instagramclient.View.AlertDialog;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.GridView;
-import ru.instagramclient.Model.Likes;
+import ru.instagramclient.Model.Like;
 import ru.instagramclient.R;
 import ru.instagramclient.View.Adapter.LikeAdapter;
 
@@ -42,15 +43,9 @@ public class MyAlertDialogImpl implements MyAlertDialog {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         View v = layoutInflater.inflate(R.layout.layout_alert_progress, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setView(v);
-        builder.setInverseBackgroundForced(true);
         alertDialogProgress = builder.create();
-        /*if(!alertDialogProgress.isShowing()) {
-            alertDialogProgress.setView(v);
-            alertDialogProgress.setCancelable(false);
-            alertDialogProgress.show();
-        }*/
         alertDialogProgress.show();
+        alertDialogProgress.setContentView(v);
     }
 
     @Override
@@ -63,14 +58,16 @@ public class MyAlertDialogImpl implements MyAlertDialog {
     }
 
     @Override
-    public void showAlertAllLikes(List<Likes> listLikes, LikeAdapter adapter) {
+    public void showAlertAllLikes(List<Like> listLikes) {
+        LikeAdapter adapter = new LikeAdapter(listLikes,  (Activity)context, R.layout.list_item_like);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         View v = layoutInflater.inflate(R.layout.layout_show_all_like, null);
         final GridView gridView = (GridView)v.findViewById(R.id.gridView);
+        gridView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
         builder.setView(v);
         alertDialogProgress = builder.create();
-        gridView.setAdapter(adapter);
         alertDialogProgress.show();
     }
 

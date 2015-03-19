@@ -20,10 +20,11 @@ import ru.instagramclient.Json.JsonCallback;
 import ru.instagramclient.Json.MediaInfoJson;
 import ru.instagramclient.Model.MediaInfo;
 import ru.instagramclient.Model.User;
-import ru.instagramclient.MyPrefs;
+import ru.instagramclient.Service.Preferences.MyPreferencesImpl;
 import ru.instagramclient.R;
 import ru.instagramclient.Service.Image.ImageService;
 import ru.instagramclient.View.Adapter.MediaInfoAdapter;
+import ru.instagramclient.View.Logout;
 
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class MainActivity extends ActionBarActivity {
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private MediaInfoAdapter adapter;
-    private MyPrefs myPrefs;
+    private MyPreferencesImpl myPreferencesImpl;
     private int count = 5;
     private int countDownloads = 0;
     private static boolean IS_EMPTY_RESULT = false;
@@ -56,7 +57,7 @@ public class MainActivity extends ActionBarActivity {
         imageService = new ImageService(this);
         mediaInfoJson = new MediaInfoJson();
         webAPI = new WebAPIImpl(this);
-        myPrefs = new MyPrefs(this);
+        myPreferencesImpl = new MyPreferencesImpl(this);
 //        user = getIntent().getParcelableExtra("user");
         TextView username = (TextView)findViewById(R.id.username);
         TextView fullName = (TextView)findViewById(R.id.fullName);
@@ -64,15 +65,13 @@ public class MainActivity extends ActionBarActivity {
         ImageView imageProfile = (ImageView)findViewById(R.id.imageProfile);
         swipe = (SwipeRefreshLayout)findViewById(R.id.swipe);
         recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
-
         final LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(mLayoutManager);
 
-        if(myPrefs.getAccessToken().equals("")){
+        if(myPreferencesImpl.getAccessToken().equals("")){
             login();
         }
         else {
-            user = myPrefs.getUserFromPref();
+            user = myPreferencesImpl.getUserFromPref();
             accessToken = user.getAccessToken();
             username.setText(user.getUsername());
             fullName.setText(user.getFullName());
@@ -85,6 +84,7 @@ public class MainActivity extends ActionBarActivity {
                 mediaInfoList = mediaInfoJson.createListFromJson(jsonObject);
                 adapter = new MediaInfoAdapter(mediaInfoList, MainActivity.this, accessToken);
                 recyclerView.setAdapter(adapter);
+                recyclerView.setLayoutManager(mLayoutManager);
                 countDownloads++;
                 try {
                     maxId = jsonObject.getJSONObject("pagination").getString("next_max_id");
@@ -167,7 +167,8 @@ public class MainActivity extends ActionBarActivity {
                 for (MediaInfo media : mediaInfoList) {
                     adapter.addItems(media);
                 }
-                adapter.notifyDataSetChanged();Log.e("maxId", "before = " + maxId);
+                adapter.notifyDataSetChanged();
+                Log.e("maxId", "before = " + maxId);
                 maxId = jsonObject.getJSONObject("pagination").getString("next_max_id");
             } else {
                 IS_EMPTY_RESULT = true;
@@ -177,13 +178,24 @@ public class MainActivity extends ActionBarActivity {
         }
     }
     public void onClickLogout(View v){
-        webAPI.logout(accessToken, new JsonCallback() {
+        webAPI.logout(accessToken, new Logout() {
             @Override
-            public void run(JSONObject jsonObject) {
-                if(myPrefs.clearPrefs()){
+            public void success() {
+                if(myPreferencesImpl.clearPrefs()){
                     login();
                 }
             }
+            @Override
+            public void failed(String error) {
+
+            }
         });
+    }
+    @Override
+    public void onResume(){
+        super.onResume();
+        if(adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 }

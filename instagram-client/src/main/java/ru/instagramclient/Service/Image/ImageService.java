@@ -92,7 +92,7 @@ public class ImageService {
                 .cacheInMemory(true)
                 .cacheOnDisk(false)
                 .showImageOnLoading(context.getResources().getDrawable(R.drawable.bg_image_profile))
-                .displayer(new RoundedBitmapDisplayer(50, 5))
+                .displayer(new RoundedBitmapDisplayer(50))
                 .imageScaleType(ImageScaleType.EXACTLY)
                 .build();
         return options;

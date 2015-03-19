@@ -1,7 +1,6 @@
 package ru.instagramclient.View.AlertDialog;
 
-import ru.instagramclient.Model.Likes;
-import ru.instagramclient.View.Adapter.LikeAdapter;
+import ru.instagramclient.Model.Like;
 
 import java.util.List;
 
@@ -14,5 +13,5 @@ public interface MyAlertDialog {
     public void showProgressDialog();
     public boolean progressIsShowing();
     public void dismissProgressDialog();
-    public void showAlertAllLikes(List<Likes> listLikes, LikeAdapter adapter);
+    public void showAlertAllLikes(List<Like> listLikes);
 }
